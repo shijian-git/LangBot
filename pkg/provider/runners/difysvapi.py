@@ -40,6 +40,14 @@ class DifyServiceAPIRunner(runner.RequestRunner):
 
     def _try_convert_thinking(self, resp_text: str) -> str:
         """尝试转换 Dify 的思考提示"""
+        # If already in <think>...</think> format, handle according to settings  
+        if "<think>" in resp_text:  
+            if self.pipeline_config['ai']['dify-service-api']['thinking-convert'] == 'remove':  
+                return re.sub(r'<think>.*?</think>\s*', '', resp_text, flags=re.DOTALL)  
+            # For "original" and "plain", we can keep as is since it's already in the desired format  
+            return resp_text  
+        
+        # Handle the old HTML format  
         if not resp_text.startswith(
             '<details style="color:gray;background-color: #f8f8f8;padding: 8px;border-radius: 4px;" open> <summary> Thinking... </summary>'
         ):
